@@ -36,6 +36,3 @@ class StartUi:
         request_btn.pack(pady=5,padx=100)
         signin_btn.pack(pady=5,padx=100)
         form_frame.pack(pady=5)
-
-    def render(self):
-        self._root.mainloop()

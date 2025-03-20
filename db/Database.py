@@ -59,7 +59,7 @@ class Database:
 
         return '''
         
-            CREATE TABLE IF NOT EXISTS "persoon_relaties" (
+            CREATE TABLE IF NOT EXISTS "persoonRelaties" (
                 "id" INTEGER PRIMARY KEY AUTOINCREMENT,
                 "persoon_id_1" INTEGER NOT NULL,
                 "persoon_id_2" INTEGER NOT NULL,

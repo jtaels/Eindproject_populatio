@@ -14,3 +14,7 @@ class SetupController:
     def create_user(self, username:str, password:str, password_repeat:str):
 
         return self._user_service.create_user(username,password,password_repeat)
+
+    def load_start_screen(self,main_frame):
+
+        self._app_controller.switch_screen("start",main_frame)

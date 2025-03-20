@@ -1,11 +1,11 @@
 class User:
 
-    def __init__(self, id, gebruikersnaam, wachtwoord, rol, twee_fa_secret, twee_fa_enabled, laatst_ingelogd, aangemaakt):
+    def __init__(self, id, username, password, role, two_fa_secret, two_fa_enabled, last_login, created):
         self.id = id
-        self.gebruikersnaam = gebruikersnaam
-        self.wachtwoord = wachtwoord
-        self.rol = rol
-        self.twee_fa_secret = twee_fa_secret
-        self.twee_fa_enabled = twee_fa_enabled
-        self.laatst_ingelogd = laatst_ingelogd
-        self.aangemaakt = aangemaakt
+        self.username = username
+        self.password = password
+        self.role = role
+        self.two_fa_secret = two_fa_secret
+        self.two_fa_enabled = two_fa_enabled
+        self.last_login = last_login
+        self.created = created

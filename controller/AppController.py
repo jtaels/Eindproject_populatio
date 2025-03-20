@@ -1,3 +1,4 @@
+import tkinter
 from tkinter import messagebox
 
 import ui.StartUi as startUi
@@ -8,6 +9,8 @@ import controller.SignInController as signInController
 from controller.StartController import StartController
 from db.repositories.UserRepository import UserRepository
 from services.userService import UserService
+from controller.DashboardController import DashboardController
+from ui.DashboardUi import DashboardUi
 
 class AppController:
 
@@ -15,6 +18,7 @@ class AppController:
 
         self._user_repository = UserRepository()
         self._user_service = UserService(self._user_repository)
+        self._user = None
 
     def clear_main_frame(self,main_frame):
         for widget in main_frame.winfo_children():
@@ -32,6 +36,8 @@ class AppController:
                 self.open_start_screen(main_frame)
             case "signIn":
                 self.open_signin_screen(main_frame)
+            case "dashboard":
+                self.open_dashboard_screen(main_frame)
             case _:
                 messagebox.showwarning("Error", "Dit is geen geldig scherm!")
 
@@ -41,8 +47,6 @@ class AppController:
         controller = SetupController(self)
         ui = SetupUi(controller,main_frame)
 
-        ui.render()
-
     def open_start_screen(self,main_frame):
 
         self.clear_main_frame(main_frame)
@@ -50,12 +54,22 @@ class AppController:
         controller = StartController(self)
         ui = startUi.StartUi(controller,main_frame)
 
-        ui.render()
-
     def open_signin_screen(self,main_frame):
         self.clear_main_frame(main_frame)
 
         controller = signInController.SignInController(self)
         ui = signInUi.SingInUi(controller, main_frame)
 
-        ui.render()
+    def open_dashboard_screen(self,main_frame):
+        self.clear_main_frame(main_frame)
+
+        controller = DashboardController(self)
+        ui = DashboardUi(controller, main_frame)
+
+    def set_user(self, user):
+
+        self._user = user
+
+    def get_user(self):
+
+        return self._user

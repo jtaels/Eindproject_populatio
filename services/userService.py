@@ -1,7 +1,9 @@
 from wsgiref.validate import validator
 from argon2 import PasswordHasher
+from argon2.exceptions import VerifyMismatchError
 
 from exceptions.UserNotFoundException import UserNotFoundException
+from exceptions.WrongCredentialsException import WrongCredentialsException
 from validator.RegisterFormValidator import  RegisterFormValidator
 
 class UserService:
@@ -9,6 +11,7 @@ class UserService:
     def __init__(self, user_repository):
 
         self._repository = user_repository
+        self._hasher = PasswordHasher()
 
     def get_by_id(self, user_id:int):
 
@@ -24,7 +27,12 @@ class UserService:
 
             user = self.get_by_username(username)
 
+            self._hasher.verify(user.password, password)
+            print("Wachtwoord correct!")
+
         except UserNotFoundException as e:
+            raise e
+        except VerifyMismatchError as e:
             raise e
 
     def get_user_count(self):
@@ -32,15 +40,13 @@ class UserService:
 
     def create_user(self, username:str, password:str, password_repeat:str):
 
-        ph = PasswordHasher()
-
-        validator = RegisterFormValidator(username,password,password_repeat)
+        validator = RegisterFormValidator(username,password,password_repeat,self._repository)
 
         validator.validate()
 
         errors,_has_errors = validator.get_errors()
 
-        password = ph.hash(password)
+        password = self._hasher.hash(password)
 
         if not _has_errors:
 

@@ -1,8 +1,11 @@
 import re
 
+from exceptions.UserNotFoundException import UserNotFoundException
+
+
 class RegisterFormValidator:
 
-    def __init__(self, username: str, password: str, password_repeat: str):
+    def __init__(self, username: str, password: str, password_repeat: str, user_repository):
         self._errors = {
 
         }
@@ -10,11 +13,24 @@ class RegisterFormValidator:
         self.username = username
         self.password = password
         self.password_repeat = password_repeat
+        self._user_repository = user_repository
+
+    def _username_exists(self):
+
+        try:
+
+            self._user_repository.get_by_username(self.username)
+
+        except UserNotFoundException as e:
+
+            self._errors["username"].append("Gebruiker bestaat al!")
 
     def _validate_username(self):
 
         if "username" not in self._errors:
             self._errors["username"] = []
+
+        self._username_exists()
 
         # Is de gebruikersnaam tussen de 3 en 20 karakters?
         if len(self.username) < 3 or len(self.username) > 20:

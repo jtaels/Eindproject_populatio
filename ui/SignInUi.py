@@ -20,7 +20,7 @@ class SingInUi:
     
     '''
     def _submit_login(self):
-        self._controller.sign_in(self._username_var.get(), self._password_var.get())
+        self._controller.sign_in(self._username_var.get(), self._password_var.get(),self._root)
 
     def _build_form(self):
 
@@ -45,12 +45,3 @@ class SingInUi:
         login_btn.pack(pady=5, padx=100)
         start_screen_btn.pack(pady=5,padx=100)
         form_frame.pack(pady=10)
-
-    def render(self):
-        self._root.mainloop()
-
-
-if __name__ == "__main__":
-    controller = None  # Hier zou je controller logica in kunnen voegen
-    ui = SingInUi(controller)
-    ui.render()

@@ -1,7 +1,9 @@
 import tkinter as tk
+from tkinter import messagebox
 import ttkbootstrap as ttkb
 from ttkbootstrap import ttk
 from ttkbootstrap.constants import *
+import utils
 
 class SetupUi:
 
@@ -12,27 +14,26 @@ class SetupUi:
 
         self._build_form()
 
-    def _submit_form(self,username_error_label,password_error_label):
+    def _submit_form(self):
 
         has_errors,errors = self._controller.create_user(self._username_var.get(),self._password_var.get(),self._password_rp_var.get())
 
         if "username" in errors:
 
-            error_str = ""
+            error_str = utils.error_array_to_str(errors["username"])
 
-            for error in errors["username"]:
-                error_str += error + "\n"
-
-            username_error_label.configure(text=error_str)
+            messagebox.showwarning("Fout", error_str)
 
         if "password" in errors:
 
-            error_str = ""
+            error_str = utils.error_array_to_str(errors["password"])
 
-            for error in errors["password"]:
-                error_str += error + "\n"
+            messagebox.showwarning("Fout", error_str)
 
-            password_error_label.configure(text=error_str)
+        if not has_errors:
+
+            messagebox.showinfo("Success", "Het gebruikersaccount is aangemaakt.")
+            self._controller.load_start_screen(self._root)
 
     def _build_form(self):
 
@@ -44,23 +45,19 @@ class SetupUi:
 
         username_label = ttk.Label(form_frame, text="Gebruikersnaam:")
         username_entry = ttk.Entry(form_frame, textvariable=self._username_var)
-        username_error_label = ttk.Label(form_frame)
 
         password_label = ttk.Label(form_frame, text="Wachtwoord:")
         password_entry = ttk.Entry(form_frame, show="*", textvariable=self._password_var)
-        password_error_label = ttk.Label(form_frame)
 
         password_rp_label = ttk.Label(form_frame, text="Herhaal wachtwoord:")
         password_rp_entry = ttk.Entry(form_frame, show="*", textvariable=self._password_rp_var)
 
-        login_btn = ttk.Button(form_frame, text="Account aanmaken", command=lambda: self._submit_form(username_error_label,password_error_label))
+        login_btn = ttk.Button(form_frame, text="Account aanmaken", command=self._submit_form)
 
         username_label.pack(pady=5,padx=100)
         username_entry.pack(pady=5,padx=100)
-        username_error_label.pack(pady=5,padx=100)
         password_label.pack(pady=5,padx=100)
         password_entry.pack(pady=5,padx=100)
-        password_error_label.pack(pady=5,padx=100)
         password_rp_label.pack(pady=5,padx=100)
         password_rp_entry.pack(pady=5,padx=100)
         login_btn.pack(pady=5, padx=100)

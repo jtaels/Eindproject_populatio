@@ -11,7 +11,12 @@ class appUi:
         self._controller = controller
         self._root = tk.Tk()
 
+
         self._setup()
+
+    def get_main_window(self):
+
+        return self._root
 
     def _setup(self):
 
