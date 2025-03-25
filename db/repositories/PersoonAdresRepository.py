@@ -2,15 +2,13 @@ import db.Database as database
 from db.entities.adres import Adres
 from db.entities.persoon import Persoon
 from db.entities.persoonAdres import PersoonAdres
-from db.repositories.AdresRepository import AdresRepository
-from db.repositories.PersoonRepository import PersoonRepository
 from exceptions.AdresNotFound import AdresNotFoundException
 from exceptions.PersonNotFound import PersonNotFoundException
 
 
 class PersoonAdresRepository:
 
-    def __init__(self,adres_repository:AdresRepository,persoon_repository:PersoonRepository):
+    def __init__(self,adres_repository:'AdresRepository',persoon_repository:'PersoonRepository'):
 
         self._db = database.Database("bevolkingsregister.db")
 

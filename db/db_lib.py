@@ -2,7 +2,7 @@ import sqlite3
 
 def connection(db_name: str):
     """Maakt een connectie met de database en retourneert de verbinding."""
-    return sqlite3.connect(db_name)
+    return sqlite3.connect("c:\\bevolkingsregister\\" + db_name)
 
 def execute_script(db_name: str, sql: str):
 

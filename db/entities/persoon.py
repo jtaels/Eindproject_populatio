@@ -1,12 +1,15 @@
 class Persoon:
-    def __init__(self, id, voornaam, achternaam, geboortedatum, geboorteplaats_id, overlijdensdatum, overlijdensplaats_id, overlijdensoorzaak, bevolkingsregisternummer,adressen):
+    def __init__(self, id:int, voornaam:str, achternaam:str, geboortedatum:str, geboorteplaats, overlijdensdatum:str, overlijdensplaats, overlijdensoorzaak:str, bevolkingsregisternummer:str):
         self.id = id
         self.voornaam = voornaam
         self.achternaam = achternaam
         self.geboortedatum = geboortedatum
-        self.geboorteplaats_id = geboorteplaats_id
+        self.geboorteplaats = geboorteplaats
         self.overlijdensdatum = overlijdensdatum
-        self.overlijdensplaats_id = overlijdensplaats_id
+        self.overlijdensplaats = overlijdensplaats
         self.overlijdensoorzaak = overlijdensoorzaak
         self.bevolkingsregisternummer = bevolkingsregisternummer
+        self.adressen = []
+
+    def set_adressen(self, adressen):
         self.adressen = adressen

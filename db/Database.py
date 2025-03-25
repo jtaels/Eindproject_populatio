@@ -49,7 +49,7 @@ class Database:
                 "overlijdensdatum" DATE,
                 "overlijdensplaats_id" INTEGER,
                 "overlijdensoorzaak" TEXT,
-                "bevolkingsregisternummer" TEXT,
+                "bevolkingsregisternummer" TEXT UNIQUE,
                 FOREIGN KEY("geboorteplaats_id") REFERENCES "gemeenten"("id") ON DELETE RESTRICT,
                 FOREIGN KEY("overlijdensplaats_id") REFERENCES "gemeenten"("id") ON DELETE RESTRICT
             );
@@ -82,7 +82,7 @@ class Database:
                 "van" DATE,
                 "tot" DATE,
                 FOREIGN KEY("persoon_id") REFERENCES "personen"("id") ON DELETE CASCADE,
-                FOREIGN KEY("adres_id") REFERENCES "adressen"("id") ON DELETE CASCADE
+                FOREIGN KEY("adres_id") REFERENCES "adressen"("id") ON DELETE RESTRICT
             );
 
         '''
@@ -95,7 +95,7 @@ class Database:
                 "id" INTEGER PRIMARY KEY AUTOINCREMENT, -- Unieke ID voor elke gebruiker
                 "gebruikersnaam" TEXT NOT NULL UNIQUE,  -- Gebruikersnaam (moet uniek zijn)
                 "wachtwoord" TEXT NOT NULL,            -- Wachtwoord van de gebruiker (kan gehasht worden)
-                "rol" TEXT NOT NULL,                   -- De rol van de gebruiker (bijv. admin, medewerker)
+                "rol" INTEGER NOT NULL,                   -- De rol van de gebruiker (bijv. admin, medewerker)
                 "twee_fa_secret" TEXT,                 -- Secret voor 2FA (bijv. TOTP, Authenticator-app)
                 "twee_fa_enabled" BOOLEAN DEFAULT 0,   -- Boolean om aan te geven of 2FA is ingeschakeld (0 = niet ingeschakeld, 1 = ingeschakeld)
                 "laatst_ingelogd" TIMESTAMP DEFAULT CURRENT_TIMESTAMP, -- Tijdstip van laatste login

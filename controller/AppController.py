@@ -29,6 +29,7 @@ class AppController:
         #Als er geen gebruikers in de database zitten moet er een superuser aangemaakt worden
         if(self._user_service.get_user_count() == 0):
             self.open_setup_screen(main_frame)
+            return
 
         match screen_name:
 

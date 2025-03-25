@@ -25,10 +25,11 @@ class UserService:
 
         try:
 
-            user = self.get_by_username(username)
+            user = self.get_by_username(username.lower())
 
             self._hasher.verify(user.password, password)
-            print("Wachtwoord correct!")
+
+            return user
 
         except UserNotFoundException as e:
             raise e

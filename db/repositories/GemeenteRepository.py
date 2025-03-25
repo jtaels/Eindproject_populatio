@@ -23,7 +23,7 @@ class GemeenteRepository:
 
     def get_by_zipcode(self, zipcode:str) -> Gemeente:
 
-        result = self._db.fetch_one("SELECT * FROM gemeente WHERE postcode=?", (id,zipcode))
+        result = self._db.fetch_one("SELECT * FROM gemeenten WHERE postcode=?", (id,zipcode))
 
         return self._build_entity(result)
 
@@ -31,7 +31,18 @@ class GemeenteRepository:
 
         gemeenten = []
 
-        results = self._db.fetch_all("SELECT * FROM gemeente WHERE postcode=?", (id,province))
+        results = self._db.fetch_all("SELECT * FROM gemeenten WHERE provincie=?", (province,))
+
+        for result in results:
+            gemeenten.append(self._build_entity(result))
+
+        return gemeenten
+
+    def get_all(self) -> list:
+
+        gemeenten = []
+
+        results = self._db.fetch_all("SELECT * FROM gemeenten")
 
         for result in results:
             gemeenten.append(self._build_entity(result))
@@ -44,7 +55,7 @@ class GemeenteRepository:
 
     def create(self, gemeente:Gemeente) -> Gemeente:
 
-        last_row_id = self._db.insert("INSERT INTO gemeenten(naam,postcode,provincie) VALUES(?,?,?)")
+        last_row_id = self._db.insert("INSERT INTO gemeenten(naam,postcode,provincie) VALUES(?,?,?)", (gemeente.naam,gemeente.postcode,gemeente.provincie))
 
         if last_row_id > 0:
 
@@ -53,6 +64,10 @@ class GemeenteRepository:
             return gemeente
 
         raise CreateGemeenteFailed()
+
+    def delete(self, id:int) -> int:
+
+        return self._db.delete("DELETE FROM gemeenten WHERE id=?", (id,))
 
 
     '''
