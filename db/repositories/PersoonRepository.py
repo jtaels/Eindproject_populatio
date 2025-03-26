@@ -8,7 +8,7 @@ from exceptions.GemeenteNotFound import GemeenteNotFoundException
 from exceptions.PersonCreateFailure import PersonCreateFailureException
 from exceptions.PersonNotFound import PersonNotFoundException
 from exceptions.PersonUpdateFailure import PersonUpdateFailureException
-
+from datetime import datetime
 
 class PersoonRepository:
 
@@ -117,9 +117,9 @@ class PersoonRepository:
         """, (
             person.voornaam,
             person.achternaam,
-            person.geboortedatum,
+            person.geboortedatum.strftime("%d-%m-%Y") if person.geboortedatum else None,
             person.geboorteplaats.id if person.geboorteplaats else None,
-            person.overlijdensdatum,
+            person.overlijdensdatum.strftime("%d-%m-%Y") if person.overlijdensdatum else None,
             person.overlijdensplaats.id if person.overlijdensplaats else None,
             person.overlijdensoorzaak,
             person.id  # ID van de persoon die geüpdatet moet worden
@@ -163,9 +163,9 @@ class PersoonRepository:
             result[0], #id
             result[1], #voornaam
             result[2], #achternaam
-            result[3], #geboortedatum
+            datetime.strptime(result[3], "%d-%m-%Y") if result[3] and result[3] != '' else None, #geboortedatum
             geboorteplaats, #geboorteplaats
-            result[5], #overlijdensdatum
+            datetime.strptime(result[5],"%d-%m-%Y") if result[5] and result[5] != '' else None, #overlijdensdatum
             overlijdensplaats, #overlijdensplaats
             result[7], #overlijdensoorzaak
             result[8], #bevolkingsregisternummer

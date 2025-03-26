@@ -14,6 +14,8 @@ from exceptions.PersonUpdateFailure import PersonUpdateFailureException
 from manager.GemeenteManager import GemeenteManager
 from services.GemeenteService import GemeenteService
 from services.PersoonService import PersoonService
+from datetime import date
+from datetime import datetime
 
 
 class DashboardController:
@@ -64,10 +66,12 @@ class DashboardController:
 
         self._clear_person_fiche()
 
+        print(type(person.geboortedatum))
+
         geboorteplaats = "" if person.geboorteplaats is None else person.geboorteplaats.naam
-        geboortedatum = "" if person.geboortedatum is None else person.geboortedatum
+        geboortedatum = "" if person.geboortedatum is None else person.geboortedatum.strftime("%d-%m-%Y")
         overlijdensplaats = "" if person.overlijdensplaats is None else person.overlijdensplaats.naam
-        overlijdensdatum = "" if person.overlijdensdatum is None else person.overlijdensdatum
+        overlijdensdatum = "" if person.overlijdensdatum is None else person.overlijdensdatum.strftime("%d-%m-%Y")
         overlijdensoorzaak = "" if person.overlijdensoorzaak is None else person.overlijdensoorzaak
 
         self.person_fiche['entity'] = person
@@ -194,26 +198,29 @@ class DashboardController:
             messagebox.showinfo("info", "Je moet eerst een persoon selecteren!")
             return
 
-        errors = []
-
         geboorteplaats = self._gemeente_manager.get_gemeente_by_name(self.person_fiche['geboorteplaats'].get())
 
         if not geboorteplaats:
-            errors.append("Geboorteplaats is ongeldig!")
+            messagebox.showinfo("Info","Je moet een geboorteplaats uit de lijst kiezen!")
+            return
 
         if self.person_fiche['overlijdensplaats'].get().strip():
             overlijdensplaats = self._gemeente_manager.get_gemeente_by_name(self.person_fiche['overlijdensplaats'].get())
 
             if not overlijdensplaats:
-                errors.append("Overlijdensplaats is ongeldig!")
+                messagebox.showinfo("Info", "Je moet een overlijdensplaats uit de lijst kiezen!")
+                return
 
-            person.overlijdensplaats = self.person_fiche['overlijdensplaats'].get()
+            person.overlijdensplaats = overlijdensplaats
+
+        geboortedatum = datetime.strptime(self.person_fiche['geboortedatum'].get(),"%d-%m-%Y") if self.person_fiche['geboortedatum'].get() else None
+        overlijdensdatum = datetime.strptime(self.person_fiche['overlijdensdatum'].get(),"%d-%m-%Y") if self.person_fiche['overlijdensdatum'].get() else None
 
         person.voornaam = self.person_fiche['voornaam'].get()
         person.achternaam = self.person_fiche['achternaam'].get()
-        person.geboortedatum = self.person_fiche['geboortedatum'].get()
+        person.geboortedatum = geboortedatum
         person.geboorteplaats = geboorteplaats
-        person.overlijdensdatum = self.person_fiche['overlijdensdatum'].get()
+        person.overlijdensdatum = overlijdensdatum
         person.overlijdenoorzaak = self.person_fiche['overlijdenoorzaak'].get()
 
         try:
@@ -222,10 +229,7 @@ class DashboardController:
         except PersonUpdateFailureException as e:
             messagebox.showerror("Fout!", "Er ging iets mis bij het bewerken van deze persoon!")
             return
-
         except FormErrorException as e:
-            e.merge_messages(errors)
-
             errorStr = ""
             for message in e.messages:
                 errorStr += message + "\n"

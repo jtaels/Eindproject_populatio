@@ -35,14 +35,13 @@ class PersonFormValidator:
     def _validate_birthdate(self):
 
         try:
-            birth_dt = datetime.strptime(self.birthdate, "%Y-%m-%d")
 
-            if birth_dt > datetime.now():
+            if self.birthdate > datetime.now():
                 self._errors.append("Geboortedatum kan niet in de toekomst liggen.")
                 self._has_errors = True
 
         except ValueError:
-            self._errors.append("Ongeldig datumformaat. Gebruik JJJJ-MM-DD.")
+            self._errors.append("Ongeldig datumformaat. Gebruik DD-MM-YYYY.")
             self._has_errors = True
 
     def _validate_deathdate(self):
@@ -51,14 +50,12 @@ class PersonFormValidator:
             return
 
         try:
-            birth_dt = datetime.strptime(self.birthdate, "%Y-%m-%d")
-            death_dt = datetime.strptime(self.deathdate, "%Y-%m-%d")
 
-            if death_dt < birth_dt:
+            if self.birthdate < self.deathdate:
                 self._errors.append("Overlijdensdatum kan niet vóór de geboortedatum liggen.")
                 self._has_errors = True
 
-            if death_dt > datetime.now():
+            if self.deathdate > datetime.now():
                 self._errors.append("Overlijdensdatum kan niet in de toekomst liggen.")
                 self._has_errors = True
 

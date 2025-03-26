@@ -25,7 +25,7 @@ class SignInController:
 
         try:
 
-            user = self._user_service.login(username,password)
+            user = self._user_service.login(username.lower(),password)
 
             self._app_controller.set_user(user)
 
