@@ -4,14 +4,18 @@ from pyexpat.errors import messages
 
 from db.entities.gemeente import Gemeente
 from db.entities.persoon import Persoon
+from db.repositories.AdresRepository import AdresRepository
 from db.repositories.GemeenteRepository import GemeenteRepository
+from db.repositories.PersoonAdresRepository import PersoonAdresRepository
 from db.repositories.PersoonRepository import PersoonRepository
 import tkinter
 from tkinter import messagebox
 
+from exceptions.AdresNotFound import AdresNotFoundException
 from exceptions.FormErrorException import FormErrorException
 from exceptions.PersonUpdateFailure import PersonUpdateFailureException
 from manager.GemeenteManager import GemeenteManager
+from services.AdresService import AdresService
 from services.GemeenteService import GemeenteService
 from services.PersoonService import PersoonService
 from datetime import date
@@ -26,11 +30,23 @@ class DashboardController:
 
         gemeente_repository = GemeenteRepository()
         persoon_repository = PersoonRepository(gemeente_repository)
+        address_repository = AdresRepository(gemeente_repository)
+        person_address_repository = PersoonAdresRepository(address_repository,persoon_repository)
 
         self._persoon_service = PersoonService(persoon_repository)
         self._gemeente_service = GemeenteService(gemeente_repository)
         self._gemeente_manager = GemeenteManager(self._gemeente_service)
+        self._address_service = AdresService(address_repository, person_address_repository)
         self._persons = []
+        self.gemeenten_namen = list(self._gemeente_manager.gemeente_dict.keys())
+
+        self._init_forms()
+
+        self._init_person_fiche()
+
+        self.result_tree = None
+
+    def _init_forms(self):
 
         self.search_form = {
 
@@ -41,9 +57,45 @@ class DashboardController:
 
         }
 
-        self._init_person_fiche()
+        self.address_search_from = {
 
-        self.result_tree = None
+            "street": tkinter.StringVar(),
+            "huisnummer": tkinter.StringVar(),
+            "busnummer": tkinter.StringVar(),
+            "postcode": tkinter.StringVar(),
+            "gemeente": tkinter.StringVar()
+
+        }
+
+        #Wanneer een gebruiker invoer doet in de postcode moeten we gaan kijken welke gemeente erbij hoort
+        self.address_search_from['postcode'].trace("w", self.on_postcode_change)
+
+    def on_postcode_change(self, *args):
+
+        entry_value = self.address_search_from['postcode'].get()
+
+        #Bij nieuwe invoer het veld telkens leeg maken
+        self.address_search_from['gemeente'].set("")
+
+        #Postcodes in belgie bevatten 4 nummers daarom pas vanaf 4 karakters de bijhorende gemeente gaan zoeken
+        if len(entry_value) >= 4:
+
+            gemeente = self._gemeente_manager.get_gemeente_by_postcode(entry_value)
+
+            if gemeente:
+                self.address_search_from['gemeente'].set(gemeente.naam)
+
+    def on_gemeente_change(self, event):
+
+        entry_value = self.address_search_from['gemeente'].get()
+
+        #Bij nieuwe invoer het veld telkens leeg maken
+        self.address_search_from['postcode'].set("")
+
+        gemeente = self._gemeente_manager.get_gemeente_by_name(entry_value)
+
+        if gemeente:
+            self.address_search_from['postcode'].set(gemeente.postcode)
 
     def _init_person_fiche(self) -> None:
 
@@ -65,8 +117,6 @@ class DashboardController:
     def _fill_person_fiche(self,person:Persoon):
 
         self._clear_person_fiche()
-
-        print(type(person.geboortedatum))
 
         geboorteplaats = "" if person.geboorteplaats is None else person.geboorteplaats.naam
         geboortedatum = "" if person.geboortedatum is None else person.geboortedatum.strftime("%d-%m-%Y")
@@ -120,6 +170,46 @@ class DashboardController:
         self._persons = results
 
         self._fill_tree(results)
+
+    def _search_address(self):
+
+        '''
+                    "street": tkinter.StringVar(),
+            "huisnummer": tkinter.StringVar(),
+            "busnummer": tkinter.StringVar(),
+            "postcode": tkinter.StringVar(),
+            "gemeente": tkinter.StringVar()
+        :return:
+        '''
+
+        straat_var = self.address_search_from['street'].get()
+        huisnummer_var = self.address_search_from['huisnummer'].get()
+        busnummer_var = self.address_search_from['busnummer'].get()
+        postcode_var = self.address_search_from['postcode'].get()
+        gemeente_var = self.address_search_from['gemeente'].get()
+
+        if not straat_var or not huisnummer_var or not postcode_var or not gemeente_var:
+            messagebox.showinfo("Controle", "Volgende velden zijn verplicht: straat, huisnummer, postcode, gemeente")
+            return
+
+        gemeente = self._gemeente_manager.get_gemeente_by_name(gemeente_var)
+
+        #Busnummer mag leeg zijn in dat geval bedoeld de gebruiker busnummer A
+        if not busnummer_var:
+            busnummer_var = self.address_search_from['busnummer'].set("A")
+
+        if not gemeente:
+            messagebox.showinfo("Controle", "Dit is geen gemeente in het Koninkrijk België")
+            return
+
+        try:
+
+            address = self._address_service.find_one(straat_var,huisnummer_var,busnummer_var,gemeente)
+
+            print(address)
+
+        except AdresNotFoundException:
+            messagebox.showinfo("Controle", "We kunnen het opgegeven adres niet vinden. Controleer of de straatnaam, huisnummer, postcode en stad juist zijn ingevoerd.")
 
     def _fill_tree(self, results):
 
@@ -187,6 +277,14 @@ class DashboardController:
             actions.append(self._build_action_obj('Gemeenten beheren', 'default', None))
 
         actions.append(self._build_action_obj('Zoeken op adres', 'default', None))
+
+        return actions
+
+    def get_address_search_form_actions(self) -> list:
+
+        actions = []
+
+        actions.append(self._build_action_obj('Zoeken', 'success', self._search_address))
 
         return actions
 
