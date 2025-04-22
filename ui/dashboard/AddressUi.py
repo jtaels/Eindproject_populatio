@@ -69,21 +69,37 @@ class AddressUi:
 
         self._tab_address.grid_rowconfigure(1, weight=1)
 
+        # Label boven de lijst
         ttk.Label(tree_frame, text="Persoonlijst").grid(row=0, column=0, pady=5, sticky="w")
 
-        columns = ("nummer","Achternaam", "Voornaam", "Geboortedatum", "Geboorteplaats", "Overlijdensdatum", "Overlijdensplaats", "Overlijdensoorzaak", "Wonend sinds", "Verhuist op")
-        self._dashboard_controller.result_tree = ttk.Treeview(tree_frame, columns=columns, show="headings")
+        # Toevoegen-knop naast het label
+        ttk.Button(tree_frame, text="Persoon inschrijven", bootstyle="success",command=lambda:self._dashboard_controller.address_add_person(self._tab_address)).grid(row=0, column=1, padx=10, pady=5, sticky="e")
+
+        columns = (
+            "nummer", "Achternaam", "Voornaam", "Geboortedatum", "Geboorteplaats","Overlijdensdatum", "Overlijdensplaats", "Overlijdensoorzaak","Wonend sinds", "Verhuist op"
+        )
+        self._dashboard_controller.address_result_tree = ttk.Treeview(tree_frame, columns=columns, show="headings")
 
         for col in columns:
-            self._dashboard_controller.result_tree.heading(col, text=col)
-            self._dashboard_controller.result_tree.column(col, width=100, anchor="center")
+            self._dashboard_controller.address_result_tree.heading(col, text=col)
+            self._dashboard_controller.address_result_tree.column(col, width=100, anchor="center")
 
-        self._dashboard_controller.result_tree.grid(row=1, column=0, pady=5, sticky="nsew")
-        self._dashboard_controller.result_tree.bind("<ButtonRelease-1>", self._dashboard_controller.on_tree_item_click)
+        self._dashboard_controller.address_result_tree.grid(row=1, column=0, columnspan=2, pady=5, sticky="nsew")
+
+        # Contextmenu
+        self._dashboard_controller.address_context_menu = tk.Menu(tree_frame, tearoff=0)
+        self._dashboard_controller.address_context_menu.add_command(label="Bewerken",
+                                                                    command=lambda:self._dashboard_controller.address_edit_person(self._tab_address))
+        self._dashboard_controller.address_context_menu.add_command(label="Verwijderen",
+                                                                    command=self._dashboard_controller.address_delete_person)
+
+        # Rechtermuisklik
+        self._dashboard_controller.address_result_tree.bind("<Button-3>",
+                                                            self._dashboard_controller.show_address_context_menu)
 
         tree_frame.grid_rowconfigure(1, weight=1)
         tree_frame.grid_columnconfigure(0, weight=1)
-
+        tree_frame.grid_columnconfigure(1, weight=0)  # Zorg dat de knop niet mee uitrekt
 
     def build(self):
 

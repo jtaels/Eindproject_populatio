@@ -51,7 +51,7 @@ class PersonFormValidator:
 
         try:
 
-            if self.birthdate < self.deathdate:
+            if self.birthdate > self.deathdate:
                 self._errors.append("Overlijdensdatum kan niet vóór de geboortedatum liggen.")
                 self._has_errors = True
 

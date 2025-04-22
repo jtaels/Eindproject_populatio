@@ -3,6 +3,7 @@ from db.entities.gemeente import Gemeente
 from db.repositories.AdresRepository import AdresRepository
 from db.repositories.PersoonAdresRepository import PersoonAdresRepository
 from exceptions.AdresNotFound import AdresNotFoundException
+from exceptions.PersonAddAddressFailure import PersonAddAddressFailure
 
 
 class AdresService:
@@ -26,3 +27,15 @@ class AdresService:
         adres.bewoners = inwoners
 
         return adres
+
+    def delete_person_from_address(self,person_address_id):
+
+        return self.person_address_repository.delete_person_from_address(person_address_id)
+
+    def add_person_to_address(self, person_id:int,address_id:int):
+
+        return self.person_address_repository.add_person_to_address(person_id, address_id)
+
+    def person_is_in_address(self,person_id:int,address_id:int) -> bool:
+
+        return self.person_address_repository.person_is_in_address(person_id, address_id)

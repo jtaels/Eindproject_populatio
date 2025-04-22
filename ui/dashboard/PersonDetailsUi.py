@@ -1,7 +1,11 @@
 import tkinter as tk
+from re import search
 from tkinter import ttk
 from ttkbootstrap import ttk
 from ttkbootstrap.widgets import DateEntry
+
+from ui.search.PersonSearchFormUi import PersonSearchFormUi
+
 
 class PersonDetailsUi:
 
@@ -19,28 +23,8 @@ class PersonDetailsUi:
         top_frame.grid_rowconfigure(0, weight=1)
         top_frame.grid_columnconfigure(0, weight=1)
 
-        # Zoekformulier
-        search_frame = ttk.Labelframe(top_frame, text="Zoeken")
-        search_frame.grid(row=0, column=0, padx=10, pady=10, sticky="nsew")
-
-        # Laat de rijen netjes verdelen
-        for i in range(7):
-            search_frame.grid_rowconfigure(i, weight=1)
-        search_frame.grid_columnconfigure(0, weight=1)
-
-        ttk.Label(search_frame, text="Voornaam").grid(row=0, column=0, padx=20, pady=(5, 0), sticky="w")
-        ttk.Entry(search_frame, width=30, textvariable=self._dashboard_controller.search_form['firstname']).grid(row=1, column=0, padx=20, pady=5, sticky="ew")
-
-        ttk.Label(search_frame, text="Achternaam").grid(row=2, column=0, padx=20, pady=(5, 0), sticky="w")
-        ttk.Entry(search_frame, width=30, textvariable=self._dashboard_controller.search_form['lastname']).grid(row=3, column=0, padx=20, pady=5, sticky="ew")
-
-        ttk.Label(search_frame, text="Bevolkingsregisternr").grid(row=4, column=0, padx=20, pady=(5, 0), sticky="w")
-        ttk.Entry(search_frame, width=30, textvariable=self._dashboard_controller.search_form['bevolkingsregisternummer']).grid(row=5, column=0, padx=20, pady=5, sticky="ew")
-
-        search_btn_last_row = 6
-        for action in self._dashboard_controller.get_search_form_actions():
-            ttk.Button(search_frame, text=action['name'], bootstyle=action['style'], command=action['command']).grid(row=search_btn_last_row, column=0, pady=5, padx=20, sticky="ew")
-            search_btn_last_row += 1
+        self.person_search_form = PersonSearchFormUi(top_frame,self._dashboard_controller.get_app_controller(),self._dashboard_controller.search_person)
+        self.person_search_form.build().grid(row=0, column=0, sticky="nsew")
 
         self._build_person_fiche_form(top_frame)
 
@@ -96,15 +80,18 @@ class PersonDetailsUi:
 
         ttk.Label(tree_frame, text="Persoonlijst").grid(row=0, column=0, pady=5, sticky="w")
 
-        columns = ("Straat", "Huisnummer", "Busnummer", "Postcode", "Gemeente", "Provincie", "Achternaam", "Voornaam", "Van", "Tot")
-        self._dashboard_controller.result_tree = ttk.Treeview(tree_frame, columns=columns, show="headings")
+        columns = ("Straat", "Huisnummer", "Busnummer", "Postcode", "Gemeente", "Provincie", "Van", "Tot")
+        self._dashboard_controller.result_tree = ttk.Treeview(tree_frame, columns=columns, show="tree headings")
 
         for col in columns:
             self._dashboard_controller.result_tree.heading(col, text=col)
             self._dashboard_controller.result_tree.column(col, width=100, anchor="center")
 
         self._dashboard_controller.result_tree.grid(row=1, column=0, pady=5, sticky="nsew")
-        self._dashboard_controller.result_tree.bind("<ButtonRelease-1>", self._dashboard_controller.on_tree_item_click)
+        self._dashboard_controller.result_tree.bind(
+            "<ButtonRelease-1>",
+            lambda event: self._dashboard_controller.on_tree_item_click(event, self.person_search_form.getController())
+        )
 
         tree_frame.grid_rowconfigure(1, weight=1)
         tree_frame.grid_columnconfigure(0, weight=1)

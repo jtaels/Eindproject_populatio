@@ -3,6 +3,7 @@ from db.entities.adres import Adres
 from db.entities.persoon import Persoon
 from db.entities.persoonAdres import PersoonAdres
 from exceptions.AdresNotFound import AdresNotFoundException
+from exceptions.PersonAddAddressFailure import PersonAddAddressFailure
 from exceptions.PersonNotFound import PersonNotFoundException
 
 
@@ -60,6 +61,25 @@ class PersoonAdresRepository:
             adressen.append(persoon_adres)
 
         return adressen
+
+    def delete_person_from_address(self,person_address_id:int):
+
+        return self._db.delete("DELETE FROM persoonAdressen WHERE id=?", (person_address_id,))
+
+    def add_person_to_address(self, person_id:int,address_id:int) -> int:
+
+        last_id = self._db.insert("INSERT INTO persoonAdressen(persoon_id,adres_id,adres_type) VALUES(?,?,'Hoofdverblijf')", (person_id,address_id))
+
+        if last_id == 0:
+            raise PersonAddAddressFailure
+
+        return last_id
+
+    def person_is_in_address(self, person_id:int,address_id:int) -> bool:
+
+        result = self._db.fetch_one("SELECT id FROM persoonAdressen WHERE persoon_id=? AND adres_id=?", (person_id,address_id,))
+
+        return result is not None
 
     def _build_entity(self, result, persoon:Persoon,adres:Adres):
 

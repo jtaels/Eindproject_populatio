@@ -77,7 +77,8 @@ class PersoonService:
         return bevolkingsnummer
 
     def update_persoon(self, person: Persoon) -> Persoon:
-
+        print(person.geboortedatum)
+        print(person.overlijdensdatum)
         validator = PersonFormValidator(person.voornaam, person.achternaam, person.geboortedatum, person.overlijdensdatum)
 
         validator.validate()

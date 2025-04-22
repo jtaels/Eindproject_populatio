@@ -2,6 +2,8 @@ from tkinter import StringVar
 
 from pyexpat.errors import messages
 
+from controller.dashboard.EditAddressSubformController import EditAddressSubformController
+from controller.search.PersonSearchController import PersonSearchController
 from db.entities.gemeente import Gemeente
 from db.entities.persoon import Persoon
 from db.repositories.AdresRepository import AdresRepository
@@ -13,6 +15,7 @@ from tkinter import messagebox
 
 from exceptions.AdresNotFound import AdresNotFoundException
 from exceptions.FormErrorException import FormErrorException
+from exceptions.PersonAddAddressFailure import PersonAddAddressFailure
 from exceptions.PersonUpdateFailure import PersonUpdateFailureException
 from manager.GemeenteManager import GemeenteManager
 from services.AdresService import AdresService
@@ -20,6 +23,9 @@ from services.GemeenteService import GemeenteService
 from services.PersoonService import PersoonService
 from datetime import date
 from datetime import datetime
+
+from ui.dashboard.AddPersonSubformUi import AddPersonSubformUi
+from ui.dashboard.EditAddressSubformUi import EditAddressSubformUi
 
 
 class DashboardController:
@@ -45,17 +51,11 @@ class DashboardController:
         self._init_person_fiche()
 
         self.result_tree = None
+        self.address_result_tree = None
+        self.address_context_menu = None
+        self.current_address_id = 0
 
     def _init_forms(self):
-
-        self.search_form = {
-
-            "firstname": tkinter.StringVar(),
-            "lastname": tkinter.StringVar(),
-            "bevolkingsregisternummer": tkinter.StringVar()
-
-
-        }
 
         self.address_search_from = {
 
@@ -147,31 +147,14 @@ class DashboardController:
         self.person_fiche['overlijdenoorzaak'].set("")
         self.person_fiche['addresses'] = []
 
+    def _clear_search_tree(self) -> None:
 
-    def _search_person(self):
-
-        firstname = self.search_form['firstname'].get()
-        lastname = self.search_form['lastname'].get()
-        bevolkingsregisternummer = self.search_form['bevolkingsregisternummer'].get()
-
-        #Als er op bevolkingsnummer moet gezocht worden niet kijken naar de voornaam achternaam
-        if bevolkingsregisternummer:
-            pass
-
-        if len(firstname) < 2 or len(lastname) < 3:
-            messagebox.showinfo("info", "Voornaam en achternaam verplicht!")
-            return
-
-        results = self._persoon_service.search_by_name(firstname,lastname)
-
-        if(len(results) == 0):
-            messagebox.showinfo("Info", "Er zijn geen resultaten gevonden voor deze zoekopdracht!")
-
-        self._persons = results
-
-        self._fill_tree(results)
+        for item in self.address_result_tree.get_children():
+            self.address_result_tree.delete(item)
 
     def _search_address(self):
+
+        self._clear_search_tree()
 
         '''
                     "street": tkinter.StringVar(),
@@ -181,6 +164,8 @@ class DashboardController:
             "gemeente": tkinter.StringVar()
         :return:
         '''
+
+        self.current_address_id = 0
 
         straat_var = self.address_search_from['street'].get()
         huisnummer_var = self.address_search_from['huisnummer'].get()
@@ -196,7 +181,7 @@ class DashboardController:
 
         #Busnummer mag leeg zijn in dat geval bedoeld de gebruiker busnummer A
         if not busnummer_var:
-            busnummer_var = self.address_search_from['busnummer'].set("A")
+            self.address_search_from['busnummer'].set("A")
 
         if not gemeente:
             messagebox.showinfo("Controle", "Dit is geen gemeente in het Koninkrijk België")
@@ -206,45 +191,74 @@ class DashboardController:
 
             address = self._address_service.find_one(straat_var,huisnummer_var,busnummer_var,gemeente)
 
-            print(address)
+            self.current_address_id = address.id
+
+#columns = ("nummer","Achternaam", "Voornaam", "Geboortedatum", "Geboorteplaats", "Overlijdensdatum", "Overlijdensplaats", "Overlijdensoorzaak", "Wonend sinds", "Verhuist op")
+            for bewoner in address.bewoners:
+
+                id = bewoner.persoon.id
+                nummer = bewoner.persoon.bevolkingsregisternummer
+                achternaam = bewoner.persoon.achternaam
+                voornaam = bewoner.persoon.voornaam
+                geboorteplaats = "" if bewoner.persoon.geboorteplaats is None else bewoner.persoon.geboorteplaats.naam
+                geboortedatum = "" if bewoner.persoon.geboortedatum is None else bewoner.persoon.geboortedatum.strftime("%d-%m-%Y")
+                overlijdensplaats = "" if bewoner.persoon.overlijdensplaats is None else bewoner.persoon.overlijdensplaats.naam
+                overlijdensdatum = "" if bewoner.persoon.overlijdensdatum is None else bewoner.persoon.overlijdensdatum.strftime("%d-%m-%Y")
+                overlijdensoorzaak = "" if bewoner.persoon.overlijdensoorzaak is None else bewoner.persoon.overlijdensoorzaak
+                wonend_sinds = bewoner.van
+                verhuisd = bewoner.tot
+
+                self.address_result_tree.insert("", "end",values=(nummer,achternaam,voornaam,geboortedatum,geboorteplaats,overlijdensdatum,overlijdensplaats,overlijdensoorzaak,wonend_sinds,verhuisd),tags=[bewoner.id,])
 
         except AdresNotFoundException:
             messagebox.showinfo("Controle", "We kunnen het opgegeven adres niet vinden. Controleer of de straatnaam, huisnummer, postcode en stad juist zijn ingevoerd.")
 
     def _fill_tree(self, results):
-
-        data = []
-
         self._clear_tree()
 
         for result in results:
+            achternaam = result.achternaam
+            voornaam = result.voornaam
+            bevolkingsregisternr = result.bevolkingsregisternummer
+            person_display = f"{voornaam} {achternaam} ({bevolkingsregisternr})"
 
-            #Alle adressen doorlopen
-            adresses = result.adressen
+            parent_id = self.result_tree.insert(
+                "", "end",
+                text=person_display,
+                values=("", "", "", "", "", "", "", ""),
+                tags=[result.id]
+            )
 
-            achternaam = result.achternaam,
-            voornaam =  result.voornaam
-
-            #persoonAdres entity
-            for address in adresses:
-
+            # Voeg elk adres toe als kind van die persoon
+            for address in result.adressen:
                 straat = address.adres.straatnaam
                 huisnummer = address.adres.huisnummer
                 busnummer = address.adres.busnummer
                 postcode = address.adres.gemeente.postcode
                 gemeente = address.adres.gemeente.naam
                 provincie = address.adres.gemeente.provincie
-                van = address.van,
+                van = address.van
                 tot = address.tot
 
-                self.result_tree.insert("", "end",values=(straat,huisnummer,busnummer,postcode,gemeente,provincie,achternaam,voornaam,van,tot),tags=[result.id,])
+                print(address)
+
+                self.result_tree.insert(
+                    parent_id,
+                    "end",
+                    text="",
+                    values=(straat, huisnummer, busnummer, postcode, gemeente, provincie, "", "", van, tot)
+                )
+
+    def search_person(self, results:list) -> None:
+
+        self._fill_tree(results)
 
     def _clear_tree(self) -> None:
 
         for item in self.result_tree.get_children():
             self.result_tree.delete(item)
 
-    def on_tree_item_click(self, event) -> None:
+    def on_tree_item_click(self, event,search_form_controller:PersonSearchController) -> None:
 
         item = self.result_tree.focus()
         item_data = self.result_tree.item(item)
@@ -255,30 +269,8 @@ class DashboardController:
             return
 
         user_id = tags[0]
-        user = self._find_in_founded_persons(user_id)
-
+        user = search_form_controller.find_in_founded_persons(user_id)
         self._fill_person_fiche(user)
-
-    def _find_in_founded_persons(self, user_id) -> object:
-
-        for person in self._persons:
-
-            if person.id == user_id:
-                return person
-
-    def get_search_form_actions(self) -> list:
-
-        actions = []
-
-        actions.append(self._build_action_obj('Zoeken', 'success', self._search_person))
-
-        if self._app_controller.get_user().role == 100:
-
-            actions.append(self._build_action_obj('Gemeenten beheren', 'default', None))
-
-        actions.append(self._build_action_obj('Zoeken op adres', 'default', None))
-
-        return actions
 
     def get_address_search_form_actions(self) -> list:
 
@@ -360,3 +352,67 @@ class DashboardController:
             'command': command
 
             }
+
+    def show_address_context_menu(self,event):
+        # Selecteer het item onder de muis
+        geselecteerd_item = self.address_result_tree.identify_row(event.y)
+        if geselecteerd_item:
+            self.address_result_tree.selection_set(geselecteerd_item)
+            self.address_context_menu.post(event.x_root, event.y_root)
+
+    def address_delete_person(self):
+        selected_item = self.address_result_tree.selection()[0]
+        tags = self.address_result_tree.item(selected_item, "tags")
+        rowId = tags[0]
+
+        confirm_delete = messagebox.askyesno("Bevestiging", "Weet je zeker dat je deze persoon wilt verwijderen van dit adres?")
+
+        if not confirm_delete:
+            messagebox.showinfo("Controle", "De persoon is niet van het adres verwijderd!")
+            return
+
+        self.address_result_tree.delete(selected_item)
+        self._address_service.delete_person_from_address(rowId)
+        messagebox.showinfo("Success", "De persoon is van het adres verwijderd")
+
+    def address_edit_person(self,root):
+        selected_item = self.address_result_tree.selection()[0]
+        tags = self.address_result_tree.item(selected_item, "tags")
+        rowId = tags[0]
+
+        print(rowId)
+
+        EditAddressSubformUi(root, rowId, self.get_app_controller(), self._on_add_person)
+
+    def address_add_person(self, root):
+
+        if self.current_address_id == 0:
+
+            messagebox.showinfo("Info", "Je moet eerst een adres selecteren!")
+
+            return
+
+        AddPersonSubformUi(root, self.address_result_tree,self.get_app_controller(),self._on_add_person)
+
+    def _on_add_person(self, person_id:int):
+
+        #Een persoon kan niet twee x aan het zelfde adres gekopppeld worden
+        if self._address_service.person_is_in_address(person_id,self.current_address_id):
+            messagebox.showinfo("Info", "Deze persoon is al ingeschreven op dit adres!")
+            return
+
+        try:
+
+            last_row_id = self._address_service.add_person_to_address(person_id, self.current_address_id)
+
+            print(last_row_id)
+
+            self._search_address()
+
+        except PersonAddAddressFailure as e:
+
+            messagebox.showinfo("Info", e.message)
+
+    def get_app_controller(self):
+
+        return self._app_controller
