@@ -6,12 +6,12 @@ from controller.dashboard.EditAddressSubformController import EditAddressSubform
 
 
 class EditAddressSubformUi(tk.Toplevel):
-    def __init__(self, master, person_address_id, app_controller, on_select=None):
+    def __init__(self, master, person_address_id, app_controller, on_save):
         super().__init__(master)
 
-        self.add_person_subform_controller = EditAddressSubformController(person_address_id)
-        self.add_person_subform_controller.on_select = on_select
-        self.add_person_subform_controller.add_person_sub_form_ui = self
+        self.edit_address_subform_controller = EditAddressSubformController(person_address_id,self)
+
+        self.edit_address_subform_controller.on_save = on_save
 
         self.title("Adres bewerken")
         self.geometry("600x800")  # Ruim venster
@@ -27,17 +27,27 @@ class EditAddressSubformUi(tk.Toplevel):
 
         # Adres soort
         ttk.Label(container, text="Adres soort").grid(row=0, column=0, padx=20, pady=(10, 0), sticky="w")
-        addressTypeEntry = ttk.Entry(container, width=30)
-        addressTypeEntry.grid(row=1, column=0, padx=20, pady=5, sticky="ew")
+        addressTypeCombobox = ttk.Combobox(container, textvariable=self.edit_address_subform_controller.form["type"],state="readonly", width=30)
+        addressTypeCombobox["values"] = [
+            "Hoofdverblijfplaats",
+            "Tijdelijk verblijf",
+            "Instelling",
+            "Verblijf bij familie / mantelzorg",
+            "Vakantieverblijf / tweede verblijf",
+            "Asielopvang / opvangcentrum"
+        ]
+        addressTypeCombobox.grid(row=1, column=0, padx=20, pady=5, sticky="ew")
 
         # Wonend sinds
         ttk.Label(container, text="Wonend sinds (dd-mm-yyyy)").grid(row=2, column=0, padx=20, pady=(10, 0), sticky="w")
         wonendEntry = DateEntry(container, width=20, dateformat='%d-%m-%Y')
+        wonendEntry.entry.configure(textvariable=self.edit_address_subform_controller.form["from"])
         wonendEntry.grid(row=3, column=0, padx=20, pady=5, sticky="ew")
 
         # Verhuist op
         ttk.Label(container, text="Verhuist op (dd-mm-yyyy)").grid(row=4, column=0, padx=20, pady=(10, 0), sticky="w")
         verhuistEntry = DateEntry(container, width=20, dateformat='%d-%m-%Y')
+        verhuistEntry.entry.configure(textvariable=self.edit_address_subform_controller.form["to"])
         verhuistEntry.grid(row=5, column=0, padx=20, pady=5, sticky="ew")
 
         # Actieknoppen onderaan
@@ -56,7 +66,8 @@ class EditAddressSubformUi(tk.Toplevel):
         # Toevoegen-knop
         toevoegen_button = ttk.Button(
             button_frame,
-            text="Persoon toevoegen",
+            text="Wijzigingen",
+            command=self.edit_address_subform_controller.save_address
         )
         toevoegen_button.pack(side="right", padx=5)
 
@@ -64,5 +75,6 @@ class EditAddressSubformUi(tk.Toplevel):
         annuleren_button = ttk.Button(
             button_frame,
             text="Annuleren",
+            command=self.destroy
         )
         annuleren_button.pack(side="right", padx=5)

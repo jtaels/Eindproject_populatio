@@ -4,6 +4,7 @@ from db.entities.persoon import Persoon
 from db.entities.persoonAdres import PersoonAdres
 from exceptions.AdresNotFound import AdresNotFoundException
 from exceptions.PersonAddAddressFailure import PersonAddAddressFailure
+from exceptions.PersonAddressNotFound import PersonAddressNotFound
 from exceptions.PersonNotFound import PersonNotFoundException
 
 
@@ -80,6 +81,22 @@ class PersoonAdresRepository:
         result = self._db.fetch_one("SELECT id FROM persoonAdressen WHERE persoon_id=? AND adres_id=?", (person_id,address_id,))
 
         return result is not None
+
+    def find_by_id(self, person_address_id:int):
+
+        result = self._db.fetch_one("SELECT * FROM persoonAdressen WHERE id=?", (person_address_id,))
+
+        if not result:
+            raise PersonAddressNotFound()
+
+        persoon = self._persoon_repository.find_by_id(result[1])
+        adres = self._adres_repository.find_by_id(result[2])
+
+        return PersoonAdres(result[0],persoon,adres,result[3],result[4],result[5])
+
+    def update(self, id:int,adres_type:str,van,tot) -> int:
+
+        return self._db.update("UPDATE persoonAdressen SET adres_type=?,van=?,tot=? WHERE id=?", (adres_type,van,tot,id))
 
     def _build_entity(self, result, persoon:Persoon,adres:Adres):
 

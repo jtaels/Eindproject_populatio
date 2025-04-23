@@ -380,9 +380,12 @@ class DashboardController:
         tags = self.address_result_tree.item(selected_item, "tags")
         rowId = tags[0]
 
-        print(rowId)
+        EditAddressSubformUi(root, rowId, self.get_app_controller(), self._on_address_edit)
 
-        EditAddressSubformUi(root, rowId, self.get_app_controller(), self._on_add_person)
+    def _on_address_edit(self):
+
+        #Update de addressenlijst
+        self._search_address()
 
     def address_add_person(self, root):
 

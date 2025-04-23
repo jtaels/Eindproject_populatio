@@ -18,6 +18,7 @@ class DashboardUi:
         self._placeholder_text = "../../...."
 
     def _build_tabs(self):
+
         #Noteboek voor navigatie aanmaken
         notebook = ttk.Notebook(self._root)
         notebook.grid(row=0, column=0, padx=10, pady=10, sticky="nsew")
@@ -25,9 +26,14 @@ class DashboardUi:
         # Tabladen toevoegen
         tab_person = ttk.Frame(notebook)
         tab_address = ttk.Frame(notebook)
+        tab_logs = ttk.Frame(notebook)
 
         notebook.add(tab_person, text="Persoonsysteem")
         notebook.add(tab_address, text="Adressen")
+
+        #Enkel administrators kunnen de logs inkijken
+        if self._controller.get_app_controller().get_user().role == 100:
+            notebook.add(tab_logs, text="Logs")
 
         #Nieuwe instance aanmaken van  de persondetails menu. Vervolgens deze klasse opbouwen zodat de layout verschijnt
         person_details_ui = PersonDetailsUi(self._controller, tab_person)
