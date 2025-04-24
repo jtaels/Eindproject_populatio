@@ -63,6 +63,17 @@ class PersoonAdresRepository:
 
         return adressen
 
+    def get_address_details(self, person_id:int,straat_id:int) -> PersoonAdres:
+        result = self._db.fetch_one("SELECT * FROM persoonAdressen WHERE persoon_id=? AND adres_id=?", (person_id,straat_id))
+
+        if not result:
+            raise PersonAddressNotFound()
+
+        persoon = self._persoon_repository.find_by_id(result[1])
+        adres = self._adres_repository.find_by_id(result[2])
+
+        return PersoonAdres(result[0],persoon,adres,result[3],result[4],result[5])
+
     def delete_person_from_address(self,person_address_id:int):
 
         return self._db.delete("DELETE FROM persoonAdressen WHERE id=?", (person_address_id,))

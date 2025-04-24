@@ -15,7 +15,7 @@ class StartUi:
 
     def _submit_form(self):
 
-        self._controller.handleRequestGezinssamenstelling(self._bevolkingsregisternr.get())
+        self._controller.handle_request_adreshistoriek(self._bevolkingsregisternr.get())
 
     def _submit_open_sign_in_screen(self):
         self._controller.open_sign_in_screen(self._root)

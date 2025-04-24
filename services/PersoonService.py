@@ -24,6 +24,15 @@ class PersoonService:
         except PersonNotFoundException as e:
             raise e
 
+    def get_person_by_bevolkingsregisternr(self, bevolkingsregisternr:str) -> Persoon:
+
+        try:
+
+            return self._person_repository.find_by_bevolkingsregisternr(bevolkingsregisternr)
+
+        except PersonNotFoundException as e:
+            raise e
+
     def search_by_name(self, firstname: str, lastname: str) -> list:
 
         return self._person_repository.find_by_name(firstname, lastname)

@@ -30,6 +30,17 @@ class PersoonRepository:
 
         return self._fill_adresses(person)
 
+    def find_by_bevolkingsregisternr(self,bevolkingsregisternr:str) -> Persoon:
+
+        result = self._db.fetch_one("SELECT * FROM personen WHERE bevolkingsregisternummer=?", (bevolkingsregisternr,))
+
+        if not result:
+            raise PersonNotFoundException(f"Persoon met id {id} bestaat niet!")
+
+        person = self._build_entity(result)
+
+        return self._fill_adresses(person)
+
     def find_by_name(self, firstname:str,lastname) -> list:
 
         persons = []

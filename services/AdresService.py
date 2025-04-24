@@ -1,5 +1,7 @@
 from db.entities.adres import Adres
 from db.entities.gemeente import Gemeente
+from db.entities.persoon import Persoon
+from db.entities.persoonAdres import PersoonAdres
 from db.repositories.AdresRepository import AdresRepository
 from db.repositories.PersoonAdresRepository import PersoonAdresRepository
 from exceptions.AdresNotFound import AdresNotFoundException
@@ -27,6 +29,14 @@ class AdresService:
         adres.bewoners = inwoners
 
         return adres
+
+    def get_address_details(self, persoon_id:int,adres_id:int) -> PersoonAdres:
+
+        return self.person_address_repository.get_address_details(persoon_id,adres_id)
+
+    def get_by_person(self,person:Persoon) -> list:
+
+        return self.person_address_repository.find_by_person(person)
 
     def delete_person_from_address(self,person_address_id):
 
