@@ -9,6 +9,7 @@ from tkinter import messagebox
 
 from validator.PersonAddressFormValidator import PersonAddressFormValidator
 
+from applogging.Logger import  Logger
 
 class EditAddressSubformController:
 
@@ -65,6 +66,8 @@ class EditAddressSubformController:
             return
 
         messagebox.showinfo("Controle", "De adresgegevens werden gewijzigd!")
+
+        Logger.info(f"Adresgegevens voor {self.selected_address_id} zijn bijgewerkt!")
 
         if self.on_save:
             self.on_save()

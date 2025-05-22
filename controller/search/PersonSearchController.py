@@ -1,5 +1,6 @@
 import tkinter
 
+from applogging.Logger import Logger
 from db.repositories.GemeenteRepository import GemeenteRepository
 from db.repositories.PersoonRepository import PersoonRepository
 from services.PersoonService import PersoonService
@@ -32,6 +33,8 @@ class PersonSearchController:
         firstname = self.search_form['firstname'].get()
         lastname = self.search_form['lastname'].get()
         bevolkingsregisternummer = self.search_form['bevolkingsregisternummer'].get()
+
+        Logger.info(f"Heeft gezocht op {firstname} {lastname}")
 
         #Als er op bevolkingsnummer moet gezocht worden niet kijken naar de voornaam achternaam
         if bevolkingsregisternummer:

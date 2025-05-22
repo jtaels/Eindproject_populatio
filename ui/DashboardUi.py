@@ -4,6 +4,7 @@ from ttkbootstrap import ttk
 from ttkbootstrap.widgets import DateEntry
 
 from ui.dashboard.AddressUi import AddressUi
+from ui.dashboard.LoggingUi import LoggingUi
 from ui.dashboard.PersonDetailsUi import PersonDetailsUi
 
 
@@ -41,3 +42,6 @@ class DashboardUi:
 
         address_ui = AddressUi(self._controller,tab_address)
         address_ui.build()
+
+        loggin_ui = LoggingUi(self._controller,tab_logs)
+        loggin_ui.build()

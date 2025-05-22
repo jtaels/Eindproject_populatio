@@ -2,6 +2,7 @@ from tkinter import StringVar
 
 from pyexpat.errors import messages
 
+from applogging.Logger import Logger
 from controller.dashboard.EditAddressSubformController import EditAddressSubformController
 from controller.search.PersonSearchController import PersonSearchController
 from db.entities.gemeente import Gemeente
@@ -173,6 +174,8 @@ class DashboardController:
         postcode_var = self.address_search_from['postcode'].get()
         gemeente_var = self.address_search_from['gemeente'].get()
 
+        Logger.info(f"Heeft gezocht op {straat_var} {huisnummer_var} {busnummer_var} {postcode_var} {gemeente_var}")
+
         if not straat_var or not huisnummer_var or not postcode_var or not gemeente_var:
             messagebox.showinfo("Controle", "Volgende velden zijn verplicht: straat, huisnummer, postcode, gemeente")
             return
@@ -265,7 +268,6 @@ class DashboardController:
         tags = item_data['tags']
 
         if(len(tags) == 0):
-            messagebox.showerror("Fout!", "Het aangeklikte item bevat een fout!")
             return
 
         user_id = tags[0]
@@ -318,15 +320,18 @@ class DashboardController:
             self._persoon_service.update_persoon(person)
         except PersonUpdateFailureException as e:
             messagebox.showerror("Fout!", "Er ging iets mis bij het bewerken van deze persoon!")
+            Logger.info(f"Fout opgetreden bij het wijzigen van persoon {person.bevolkingsregisternummer}. Exception: " + e.message)
             return
         except FormErrorException as e:
             errorStr = ""
             for message in e.messages:
                 errorStr += message + "\n"
 
+            Logger.info(f"Formulier voor het wijzigen van {person.bevolkingsregisternummer} bevat volgende fouten: " + errorStr)
             messagebox.showinfo("Controle", errorStr)
             return
 
+        Logger.info(f"{person.bevolkingsregisternummer} is bijgewerkt!")
         messagebox.showinfo("Controle", "De persoon is gewijzigd!")
 
 
@@ -337,9 +342,6 @@ class DashboardController:
         if self._app_controller.get_user().role > 50:
 
             actions.append(self._build_action_obj('Wijzigen', 'success', self._update_person))
-
-        if self._app_controller.get_user().role == 100:
-            actions.append(self._build_action_obj('Verwijderen', 'danger', None))
 
         return actions
 
@@ -375,6 +377,8 @@ class DashboardController:
         self._address_service.delete_person_from_address(rowId)
         messagebox.showinfo("Success", "De persoon is van het adres verwijderd")
 
+        Logger.info(f"{rowId} is verwijderd uit personAdressen")
+
     def address_edit_person(self,root):
         selected_item = self.address_result_tree.selection()[0]
         tags = self.address_result_tree.item(selected_item, "tags")
@@ -401,6 +405,9 @@ class DashboardController:
 
         #Een persoon kan niet twee x aan het zelfde adres gekopppeld worden
         if self._address_service.person_is_in_address(person_id,self.current_address_id):
+
+            Logger.info(f"Probeerde {person_id} aan adres {self.current_address_id} te koppelen. Persoon is al ingeschreven op dit adres!")
+
             messagebox.showinfo("Info", "Deze persoon is al ingeschreven op dit adres!")
             return
 
@@ -408,12 +415,13 @@ class DashboardController:
 
             last_row_id = self._address_service.add_person_to_address(person_id, self.current_address_id)
 
-            print(last_row_id)
+            Logger.info(f"{person_id} is toegevoegd aan {self.current_address_id}")
 
             self._search_address()
 
         except PersonAddAddressFailure as e:
 
+            Logger.info(f"Probeerde een persoon aan een adres te koppelen maar kreeg volgende fout: " + e.message)
             messagebox.showinfo("Info", e.message)
 
     def get_app_controller(self):

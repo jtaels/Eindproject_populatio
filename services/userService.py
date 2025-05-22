@@ -1,7 +1,7 @@
 from wsgiref.validate import validator
 from argon2 import PasswordHasher
 from argon2.exceptions import VerifyMismatchError
-
+from applogging.Logger import Logger
 from exceptions.UserNotFoundException import UserNotFoundException
 from exceptions.WrongCredentialsException import WrongCredentialsException
 from validator.RegisterFormValidator import  RegisterFormValidator

@@ -1,5 +1,6 @@
 from argon2.exceptions import VerifyMismatchError
 
+from applogging.Logger import Logger
 from db.repositories.UserRepository import UserRepository
 from exceptions.UserNotFoundException import UserNotFoundException
 from exceptions.WrongCredentialsException import WrongCredentialsException
@@ -27,11 +28,15 @@ class SignInController:
 
             user = self._user_service.login(username.lower(),password)
 
+            Logger.info(username + " is succesvol ingelogd!")
+
             self._app_controller.set_user(user)
 
             self.open_dashboard_screen(main_frame)
 
         except UserNotFoundException as e:
+            Logger.info(e.message)
             messagebox.showerror("Error", "Gebruikersnaam of wachtwoord is verkeerd!")
         except VerifyMismatchError as e:
+            Logger.info(username + " voerde een foutief paswoord in!")
             messagebox.showerror("Error", "Gebruikersnaam of wachtwoord is verkeerd!")
