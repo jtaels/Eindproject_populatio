@@ -3,14 +3,8 @@ from tkinter import StringVar
 from pyexpat.errors import messages
 
 from applogging.Logger import Logger
-from controller.dashboard.EditAddressSubformController import EditAddressSubformController
 from controller.search.PersonSearchController import PersonSearchController
-from db.entities.gemeente import Gemeente
 from db.entities.persoon import Persoon
-from db.repositories.AdresRepository import AdresRepository
-from db.repositories.GemeenteRepository import GemeenteRepository
-from db.repositories.PersoonAdresRepository import PersoonAdresRepository
-from db.repositories.PersoonRepository import PersoonRepository
 import tkinter
 from tkinter import messagebox
 
@@ -18,11 +12,6 @@ from exceptions.AdresNotFound import AdresNotFoundException
 from exceptions.FormErrorException import FormErrorException
 from exceptions.PersonAddAddressFailure import PersonAddAddressFailure
 from exceptions.PersonUpdateFailure import PersonUpdateFailureException
-from manager.GemeenteManager import GemeenteManager
-from services.AdresService import AdresService
-from services.GemeenteService import GemeenteService
-from services.PersoonService import PersoonService
-from datetime import date
 from datetime import datetime
 
 from ui.dashboard.AddPersonSubformUi import AddPersonSubformUi
@@ -35,15 +24,10 @@ class DashboardController:
 
         self._app_controller = app_controller
 
-        gemeente_repository = GemeenteRepository()
-        persoon_repository = PersoonRepository(gemeente_repository)
-        address_repository = AdresRepository(gemeente_repository)
-        person_address_repository = PersoonAdresRepository(address_repository,persoon_repository)
-
-        self._persoon_service = PersoonService(persoon_repository)
-        self._gemeente_service = GemeenteService(gemeente_repository)
-        self._gemeente_manager = GemeenteManager(self._gemeente_service)
-        self._address_service = AdresService(address_repository, person_address_repository)
+        self._persoon_service = app_controller.container.get('persoon_service')
+        self._gemeente_service = app_controller.container.get('gemeente_service')
+        self._gemeente_manager = app_controller.container.get('gemeente_manager')
+        self._address_service = app_controller.container.get('adres_service')
         self._persons = []
         self.gemeenten_namen = list(self._gemeente_manager.gemeente_dict.keys())
 

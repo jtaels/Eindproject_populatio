@@ -24,6 +24,7 @@ class GemeenteManager:
 
     def reload_gemeenten(self):
         self._gemeenten = self._gemeente_service.find_all()
+        # Sorteren op naam
+        self._gemeenten.sort(key=lambda g: g.naam.lower())
         self.gemeente_dict = {g.naam: g for g in self._gemeenten}
-
         self.postcode_dict = {g.postcode: g for g in self._gemeenten}

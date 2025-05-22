@@ -1,13 +1,9 @@
 import sqlite3
 import tkinter
 from tkinter import messagebox
-import controller.AppController as appController
-import ui.AppUi as appUi
 import os
-
+from di_container import setup_container
 import db.Database as database
-
-#default password @minD!3St#Pl
 
 DB_NAME = "bevolkingsregister.db"
 PROJECT_DIR = "c:\\bevolkingsregister\\"
@@ -18,10 +14,12 @@ debug = True
 Open het startscherm
 
 '''
+
+container = setup_container()
+
 def openUi():
 
-    controller = appController.AppController()
-    ui = appUi.appUi(controller)
+    ui = container.get('app_ui')
 
     ui.render()
 

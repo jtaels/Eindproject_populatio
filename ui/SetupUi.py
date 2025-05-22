@@ -32,7 +32,9 @@ class SetupUi:
 
         if not has_errors:
 
-            messagebox.showinfo("Success", "Het gebruikersaccount is aangemaakt.")
+            messagebox.showinfo("Success", "Het gebruikersaccount is aangemaakt. Even geduld, de testdata wordt gegenereerd.")
+
+            self._controller.generate_start_data()
             self._controller.load_start_screen(self._root)
 
     def _build_form(self):

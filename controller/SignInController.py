@@ -4,7 +4,7 @@ from applogging.Logger import Logger
 from db.repositories.UserRepository import UserRepository
 from exceptions.UserNotFoundException import UserNotFoundException
 from exceptions.WrongCredentialsException import WrongCredentialsException
-from services.userService import UserService
+from services.UserService import UserService
 from tkinter import messagebox
 
 class SignInController:
@@ -13,8 +13,7 @@ class SignInController:
 
         self._app_controller = app_controller
 
-        self._user_repository = UserRepository()
-        self._user_service = UserService(self._user_repository)
+        self._user_service = app_controller.container.get('user_service')
 
     def open_start_screen(self,main_frame):
         self._app_controller.switch_screen('start', main_frame)

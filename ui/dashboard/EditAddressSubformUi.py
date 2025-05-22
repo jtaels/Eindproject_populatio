@@ -9,7 +9,7 @@ class EditAddressSubformUi(tk.Toplevel):
     def __init__(self, master, person_address_id, app_controller, on_save):
         super().__init__(master)
 
-        self.edit_address_subform_controller = EditAddressSubformController(person_address_id,self)
+        self.edit_address_subform_controller = EditAddressSubformController(person_address_id,self,app_controller.container)
 
         self.edit_address_subform_controller.on_save = on_save
 

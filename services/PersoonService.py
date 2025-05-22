@@ -69,7 +69,7 @@ class PersoonService:
 
     def _generate_bevolkingsregisterNr(self,geboortedatum):
 
-        geboortedatum_obj = datetime.strptime(geboortedatum, "%Y-%m-%d")
+        geboortedatum_obj = datetime.strptime(geboortedatum, "%d-%m-%Y")
 
 
         dag = geboortedatum_obj.day

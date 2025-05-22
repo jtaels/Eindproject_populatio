@@ -54,7 +54,7 @@ class PersonDetailsUi:
         birthdateEntry.entry.configure(textvariable=self._dashboard_controller.person_fiche['geboortedatum'])
 
         ttk.Label(data_frame, text="Geboorteplaats").grid(row=4, column=1, padx=20, pady=(5, 0), sticky="w")
-        ttk.Combobox(data_frame, width=20, textvariable=self._dashboard_controller.person_fiche['geboorteplaats']).grid(row=5, column=1, padx=20, pady=5, sticky="ew")
+        ttk.Combobox(data_frame, width=20,values=self._dashboard_controller.gemeenten_namen, textvariable=self._dashboard_controller.person_fiche['geboorteplaats']).grid(row=5, column=1, padx=20, pady=5, sticky="ew")
 
         ttk.Label(data_frame, text="Overlijdensdatum (dd-mm-yyyy)").grid(row=6, column=0, padx=20, pady=(5, 0), sticky="w")
         deathdateEntry = DateEntry(data_frame, width=20, dateformat='%d-%m-%Y')
@@ -62,7 +62,7 @@ class PersonDetailsUi:
         deathdateEntry.entry.configure(textvariable=self._dashboard_controller.person_fiche['overlijdensdatum'])
 
         ttk.Label(data_frame, text="Overlijdensplaats").grid(row=6, column=1, padx=20, pady=(5, 0), sticky="w")
-        ttk.Combobox(data_frame, width=20, textvariable=self._dashboard_controller.person_fiche['overlijdensplaats']).grid(row=7, column=1, padx=20, pady=5, sticky="ew")
+        ttk.Combobox(data_frame, width=20, values=self._dashboard_controller.gemeenten_namen,textvariable=self._dashboard_controller.person_fiche['overlijdensplaats']).grid(row=7, column=1, padx=20, pady=5, sticky="ew")
 
         ttk.Label(data_frame, text="Overlijdensoorzaak").grid(row=8, column=0, columnspan=2, padx=20, pady=(5, 0), sticky="w")
         ttk.Entry(data_frame, width=50, textvariable=self._dashboard_controller.person_fiche['overlijdenoorzaak']).grid(row=9, column=0, columnspan=2, padx=20, pady=5, sticky="ew")

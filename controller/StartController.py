@@ -1,16 +1,5 @@
-import ui.SignInUi as signInUi
-import controller.SignInController as signInController
-import tkinter
-
-from db.entities.adres import Adres
-from db.repositories.AdresRepository import AdresRepository
-from db.repositories.GemeenteRepository import GemeenteRepository
-from db.repositories.PersoonAdresRepository import PersoonAdresRepository
-from db.repositories.PersoonRepository import PersoonRepository
 from exceptions.PersonNotFound import PersonNotFoundException
 from generator.AdresHistoriekPdfGenerator import AdresHistoriekPdfGenerator
-from services.AdresService import AdresService
-from services.PersoonService import PersoonService
 
 from tkinter import messagebox
 from tkinter import filedialog
@@ -22,12 +11,8 @@ class StartController:
 
         self._app_controller = app_controller
 
-        self._gemeente_repository = GemeenteRepository()
-        self._adres_repository = AdresRepository(self._gemeente_repository)
-        self._person_repository = PersoonRepository(self._gemeente_repository)
-        self._person_address_repository = PersoonAdresRepository(self._adres_repository,self._person_repository)
-        self._person_service = PersoonService(self._person_repository)
-        self._adres_service = AdresService(self._adres_repository,self._person_address_repository)
+        self._person_service = app_controller.container.get('persoon_service')
+        self._adres_service = app_controller.container.get('adres_service')
 
     '''
 

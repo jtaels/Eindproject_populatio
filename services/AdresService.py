@@ -30,6 +30,10 @@ class AdresService:
 
         return adres
 
+    def create(self, adres:Adres):
+
+        return self.adres_repository.create(adres)
+
     def get_address_details(self, persoon_id:int,adres_id:int) -> PersoonAdres:
 
         return self.person_address_repository.get_address_details(persoon_id,adres_id)

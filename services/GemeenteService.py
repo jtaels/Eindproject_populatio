@@ -1,3 +1,4 @@
+from db.entities.gemeente import Gemeente
 from db.repositories.GemeenteRepository import GemeenteRepository
 
 
@@ -10,3 +11,6 @@ class GemeenteService:
     def find_all(self):
 
         return self._gemeente_repository.get_all()
+
+    def create(self, gemeente:Gemeente):
+        return self._gemeente_repository.create(gemeente)

@@ -18,6 +18,8 @@ class DashboardUi:
 
         self._placeholder_text = "../../...."
 
+        self._root.winfo_toplevel().geometry("1200x800")
+
     def _build_tabs(self):
 
         #Noteboek voor navigatie aanmaken

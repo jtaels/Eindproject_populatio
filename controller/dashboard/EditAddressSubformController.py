@@ -1,3 +1,4 @@
+from Container import Container
 from db.entities.persoon import Persoon
 from db.repositories.AdresRepository import AdresRepository
 from db.repositories.GemeenteRepository import GemeenteRepository
@@ -13,17 +14,14 @@ from applogging.Logger import  Logger
 
 class EditAddressSubformController:
 
-    def __init__(self, selected_address_id,master):
+    def __init__(self, selected_address_id,master,container:Container):
 
         self.selected_address_id = selected_address_id
 
         self.master = master
         self.on_save = None
 
-        self.gemeente_repository = GemeenteRepository()
-        self.address_repository = AdresRepository(self.gemeente_repository)
-        self.person_repository = PersoonRepository(self.gemeente_repository)
-        self.person_address_repository = PersoonAdresRepository(self.address_repository,self.person_repository)
+        self.person_address_repository = container.get('person_adres_repository')
 
         self.person_address = self.person_address_repository.find_by_id(self.selected_address_id)
 

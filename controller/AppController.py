@@ -3,21 +3,20 @@ from tkinter import messagebox
 
 import ui.StartUi as startUi
 import ui.SignInUi as signInUi
+from Container import Container
 from controller.SetupController import SetupController
 from ui.SetupUi import SetupUi
 import controller.SignInController as signInController
-from controller.StartController import StartController
-from db.repositories.UserRepository import UserRepository
-from services.userService import UserService
 from controller.DashboardController import DashboardController
 from ui.DashboardUi import DashboardUi
 
 class AppController:
 
-    def __init__(self):
+    def __init__(self, container:Container):
 
-        self._user_repository = UserRepository()
-        self._user_service = UserService(self._user_repository)
+        self.container = container
+
+        self._user_service = container.get('user_service')
         self._user = None
 
     def clear_main_frame(self,main_frame):
@@ -45,14 +44,14 @@ class AppController:
     def open_setup_screen(self,main_frame):
         self.clear_main_frame(main_frame)
 
-        controller = SetupController(self)
+        controller = self.container.get('setup_controller')
         ui = SetupUi(controller,main_frame)
 
     def open_start_screen(self,main_frame):
 
         self.clear_main_frame(main_frame)
 
-        controller = StartController(self)
+        controller = self.container.get('start_controller')
         ui = startUi.StartUi(controller,main_frame)
 
     def open_signin_screen(self,main_frame):
